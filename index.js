@@ -12,7 +12,7 @@ async function startBot(){
   sock.ev.on('creds.update', saveCreds);
 
   if(!sock.authState.creds.registered){
-    let num = "224XXXXXXXXX"; // <--- METS TON NUMERO ICI SANS + EX: 224620000000
+    let num = "224621740232"; // <--- METS TON NUMERO ICI SANS + EX: 224620000000
     setTimeout(async()=>{
       let code = await sock.requestPairingCode(num);
       console.log("TON CODE D'APPARIAGE EST : " + code);
