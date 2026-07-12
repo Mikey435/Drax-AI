@@ -1,0 +1,1 @@
+exports.run=async(s,m)=>{await s.sendMessage(m.key.remoteJid,{text:'♔ *YTMP4* activé! Fonction complète dans la V3.1 Boss 🔥'},{quoted:m})}

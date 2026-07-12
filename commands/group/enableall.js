@@ -1,0 +1,1 @@
+const fs=require('fs'); const f='./data/group.json'; const g=()=>{try{return JSON.parse(fs.readFileSync(f))}catch{return{}}}; exports.run=async(s,m)=>{const j=m.key.remoteJid; let d=g(); if(!d[j]) d[j]={}; d[j].welcome=true; d[j].goodbye=true; d[j].antilink=true; fs.writeFileSync(f,JSON.stringify(d,null,2)); await s.sendMessage(j,{text:'✅ TOUT ACTIVÉ 🌍'}, {quoted:m})}

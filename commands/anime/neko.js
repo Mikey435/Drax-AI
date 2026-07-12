@@ -1,0 +1,1 @@
+exports.run=async(s,m)=>{await s.sendMessage(m.key.remoteJid,{text:'♔ *NEKO* activé! Fonction complète dans la V3.1 Boss 🔥'},{quoted:m})}

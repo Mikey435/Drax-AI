@@ -1,0 +1,2 @@
+const fs=require('fs'); const f='./data/group.json'; const g=()=>{try{return JSON.parse(fs.readFileSync(f))}catch{return{}}}; const sv=d=>fs.writeFileSync(f,JSON.stringify(d,null,2));
+exports.run=async(s,m,a)=>{const j=m.key.remoteJid; let d=g(); if(!d[j]) d[j]={}; const o=(a[0]||'').toLowerCase(); if(o==='on'){d[j].goodbye=true; sv(d); return s.sendMessage(j,{text:'✅ Goodbye ON'},{quoted:m})} if(o==='off'){d[j].goodbye=false; sv(d); return s.sendMessage(j,{text:'❌ Goodbye OFF'},{quoted:m})} return s.sendMessage(j,{text:`Goodbye: ${d[j].goodbye?'✅ ON':'❌ OFF'}`},{quoted:m})}

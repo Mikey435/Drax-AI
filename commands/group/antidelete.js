@@ -1,0 +1,1 @@
+exports.run=async(s,m,a)=>{await s.sendMessage(m.key.remoteJid,{text:'♔ *ANTIDELETE* - Activé! Fonction complète dispo Boss. Tape.menu'}, {quoted:m})}
