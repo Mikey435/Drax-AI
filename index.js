@@ -1,6 +1,13 @@
 const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys')
 const qrcode = require('qrcode-terminal')
 const pino = require('pino')
+const express = require('express')
+
+// Petit serveur pour Render
+const app = express()
+const PORT = process.env.PORT || 3000
+app.get('/', (req, res) => res.send('Drax-AI is running!'))
+app.listen(PORT, () => console.log('Serveur sur port ' + PORT))
 
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState('auth_info')
