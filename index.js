@@ -1,63 +1,50 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const P = require('pino');
-const express = require('express');
+// DRAX-ULTIME V4 - QR EDITION BY CHEF
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys')
+const P = require('pino')
+const qrcode = require('qrcode-terminal')
 
-const app = express();
-const PORT = process.env.PORT || 10000;
+async function startDrax() {
+    const { state, saveCreds } = await useMultiFileAuthState('auth_info_baileys')
 
-app.get('/', (req,res)=>{
-  res.send('<h1 style="font-family:sans-serif;text-align:center">Drax-AI CODE ✅<br>Va dans Render > Logs pour voir ton code</h1>');
-});
-app.listen(PORT, ()=> console.log('Web en ligne sur port ' + PORT));
+    const sock = makeWASocket({
+        auth: state,
+        logger: P({ level: 'silent' }),
+        printQRInTerminal: true,
+        browser: ["DRAX-ULTIME", "Chrome", "1.0"]
+    })
 
-const PHONE_NUMBER = "224621740232"; // TON NUMERO, NE TOUCHE PLUS
+    sock.ev.on('creds.update', saveCreds)
 
-async function startBot(){
-  const { state, saveCreds } = await useMultiFileAuthState('session');
-  const sock = makeWASocket({
-    auth: state,
-    logger: P({ level: 'silent' }),
-    printQRInTerminal: false,
-    browser: ["Ubuntu", "Chrome", "20.0.0"]
-  });
+    sock.ev.on('connection.update', async (update) => {
+        const { connection, lastDisconnect, qr } = update
 
-  sock.ev.on('creds.update', saveCreds);
+        if(qr) {
+            console.log("=== SCANNE CE QR CHEF ===")
+            qrcode.generate(qr, { small: false })
+        }
 
-  if(!sock.authState.creds.registered){
-    setTimeout(async ()=>{
-      try{
-        console.log('Demande du code pour ' + PHONE_NUMBER + '...');
-        let code = await sock.requestPairingCode(PHONE_NUMBER);
-        console.log('===========================================');
-        console.log('TON CODE : ' + code);
-        console.log('WhatsApp > Appareils lies > Lier avec numero');
-        console.log('===========================================');
-      }catch(e){
-        console.log('Erreur code:', e.message);
-      }
-    }, 5000);
-  }
+        if(connection === 'close') {
+            const shouldReconnect = lastDisconnect?.error?.output?.statusCode!== DisconnectReason.loggedOut
+            console.log('Deconnecté, reconnexion...', shouldReconnect)
+            if(shouldReconnect) startDrax()
+        } else if(connection === 'open') {
+            console.log('✅ DRAX CONNECTÉ CHEF! BOT EN LIGNE!')
+        }
+    })
 
-  sock.ev.on('connection.update', (update)=>{
-    const { connection, lastDisconnect } = update;
-    if(connection === 'open'){
-      console.log('✅ CONNECTE CHEF! BOT LIVE!');
-    }
-    if(connection === 'close'){
-      let shouldReconnect = lastDisconnect?.error?.output?.statusCode!== DisconnectReason.loggedOut;
-      console.log('Deconnecte, reconnexion...', shouldReconnect);
-      if(shouldReconnect) setTimeout(startBot, 3000);
-    }
-  });
+    sock.ev.on('messages.upsert', async ({ messages }) => {
+        const m = messages[0]
+        if(!m.message || m.key.fromMe) return
+        const text = m.message.conversation || m.message.extendedTextMessage?.text || ""
+        const from = m.key.remoteJid
 
-  sock.ev.on('messages.upsert', async m=>{
-    const msg = m.messages[0];
-    if(!msg.message) return;
-    const text = msg.message.conversation || msg.message.extendedTextMessage?.text || '';
-    if(text.toLowerCase() === '.ping'){
-      await sock.sendMessage(msg.key.remoteJid, { text: 'pong ✅ Drax-AI est LIVE Chef!' });
-    }
-  });
+        if(text.toLowerCase() === '.ping') {
+            await sock.sendMessage(from, { text: '*PONG! 🏓 DRAX EST EN LIGNE CHEF!*\n> Vitesse: Ultra Rapide\n> Version: V4 QR' })
+        }
+        if(text.toLowerCase() === '.menu') {
+            await sock.sendMessage(from, { text: `*🔥 DRAX-ULTIME MENU 🔥*\n\n.ping - Teste le bot\n.menu - Affiche ce menu\n.sticker - Envoie image +.sticker\n\n_Bot by Chef 224_*` })
+        }
+    })
 }
 
-startBot();
+startDrax()
